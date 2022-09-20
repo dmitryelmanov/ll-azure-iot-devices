@@ -8,4 +8,11 @@ public static class ConsoleWriter
         Console.WriteLine(msg);
         Console.ResetColor();
     }
+
+    public static void Write(string? msg, ConsoleColor color)
+    {
+        Console.ForegroundColor = color;
+        Console.Write(msg);
+        Console.ResetColor();
+    }
 }

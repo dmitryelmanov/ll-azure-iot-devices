@@ -11,61 +11,40 @@ var execOptions = new Loop.Options
     IntervalMs = 3 * 1000,
 };
 
-ConsoleWriter.WriteLine($"Start IoT Device {DEVICE_CONNECTION_STRING.GetDeviceId()}", ConsoleColor.Green);
+ConsoleWriter.WriteLine($"Start IoT Device {DEVICE_CONNECTION_STRING.GetDeviceId()}", ConsoleColor.Cyan);
 
-ConsoleWriter.WriteLine("Create device client", ConsoleColor.Green);
+ConsoleWriter.Write("Creating device client... ", ConsoleColor.Cyan);
 using var client = DeviceClient.CreateFromConnectionString(DEVICE_CONNECTION_STRING, TransportType.Mqtt);
+ConsoleWriter.WriteLine("OK", ConsoleColor.Green);
 
-ConsoleWriter.WriteLine("Setup Connection Status Handler", ConsoleColor.Green);
+ConsoleWriter.WriteLine("Setup Connection Status Handler", ConsoleColor.Cyan);
 client.SetConnectionStatusChangesHandler(async (status, reason) =>
 {
     ConsoleWriter.WriteLine($"Connection status changed to {status} because of {reason}", ConsoleColor.Yellow);
 
     if (status == ConnectionStatus.Connected)
     {
-        ConsoleWriter.WriteLine("Sync properties", ConsoleColor.Green);
+        ConsoleWriter.WriteLine("Sync properties", ConsoleColor.Cyan);
+        ConsoleWriter.WriteLine("Get device Twin", ConsoleColor.Cyan);
         var twin = await client.GetTwinAsync();
-        ConsoleWriter.WriteLine("Get device Twin", ConsoleColor.Green);
-        ConsoleWriter.WriteLine("Twin:", ConsoleColor.Green);
-        ConsoleWriter.WriteLine(twin?.ToJson(), ConsoleColor.Blue);
-        foreach (KeyValuePair<string, object> prop in twin!.Properties.Desired)
-        {
-            if (prop.Key == "TelemetryInterval")
-            {
-                ConsoleWriter.WriteLine($"Set 'TelemetryInterval' to {prop.Value}", ConsoleColor.Magenta);
-                execOptions.IntervalMs = Convert.ToInt32(prop.Value);
-            }
-        }
-        ConsoleWriter.WriteLine("Update reported properties", ConsoleColor.Green);
-        var reported = new TwinCollection();
-        reported["TelemetryInterval"] = execOptions.IntervalMs;
-        await client.UpdateReportedPropertiesAsync(reported);
+        ConsoleWriter.WriteLine("Twin:", ConsoleColor.Cyan);
+        ConsoleWriter.WriteLine(twin?.ToJson(Formatting.Indented), ConsoleColor.Blue);
+
+        await UpdateProps(twin!.Properties.Desired);
     }
 });
 
-ConsoleWriter.WriteLine("Setup Desired Property Handlers", ConsoleColor.Green);
+ConsoleWriter.WriteLine("Setup Desired Property Handlers", ConsoleColor.Cyan);
 await client.SetDesiredPropertyUpdateCallbackAsync(
     async (props, userContext) =>
     {
         var reported = new TwinCollection();
         ConsoleWriter.WriteLine("Desired properties update received:", ConsoleColor.Yellow);
-        foreach (KeyValuePair<string, object> prop in props)
-        {
-            ConsoleWriter.WriteLine($"{prop.Key}: {prop.Value}", ConsoleColor.Magenta);
-            switch (prop.Key)
-            {
-                case "TelemetryInterval":
-                    execOptions.IntervalMs = Convert.ToInt32(prop.Value);
-                    reported[prop.Key] = execOptions.IntervalMs;
-                    break;
-            }
-        }
-
-        await client.UpdateReportedPropertiesAsync(reported);
+        await UpdateProps(props);
     },
     null);
 
-ConsoleWriter.WriteLine("Setup Direct Methods", ConsoleColor.Green);
+ConsoleWriter.WriteLine("Setup Direct Methods Handlers", ConsoleColor.Cyan);
 await client.SetMethodHandlerAsync(
     "ping",
     async (request, userContext) =>
@@ -76,17 +55,18 @@ await client.SetMethodHandlerAsync(
     },
     null);
 
-ConsoleWriter.WriteLine("Setup C2D Message Handler", ConsoleColor.Green);
+ConsoleWriter.WriteLine("Setup C2D Message Handler", ConsoleColor.Cyan);
 await client.SetReceiveMessageHandlerAsync(
     async (msg, userContext) =>
     {
         using var reader = new StreamReader(msg.BodyStream);
         ConsoleWriter.WriteLine("C2D message received:", ConsoleColor.Yellow);
         ConsoleWriter.WriteLine(reader.ReadToEnd(), ConsoleColor.Magenta);
+        await client.CompleteAsync(msg);
     },
     null);
 
-ConsoleWriter.WriteLine("Sending telemetry", ConsoleColor.Green);
+ConsoleWriter.WriteLine("Sending telemetry", ConsoleColor.Cyan);
 var source = new TelemetrySource();
 await Loop.ExecuteAsync(async () =>
 {
@@ -97,7 +77,30 @@ await Loop.ExecuteAsync(async () =>
 },
 execOptions);
 
-ConsoleWriter.WriteLine("Close device connection", ConsoleColor.Green);
+ConsoleWriter.WriteLine("Close device connection", ConsoleColor.Cyan);
 await client.CloseAsync();
 
-ConsoleWriter.WriteLine($"Stop IoT Device {DEVICE_CONNECTION_STRING.GetDeviceId()}", ConsoleColor.Green);
+ConsoleWriter.WriteLine($"Stop IoT Device {DEVICE_CONNECTION_STRING.GetDeviceId()}", ConsoleColor.Cyan);
+
+
+async Task UpdateProps(TwinCollection desired)
+{
+    var reported = new TwinCollection();
+    foreach (KeyValuePair<string, object> prop in desired)
+    {
+        ConsoleWriter.WriteLine($"{prop.Key}: {prop.Value}", ConsoleColor.Magenta);
+        if (prop.Key == "TelemetryInterval")
+        {
+            execOptions!.IntervalMs = Convert.ToInt32(prop.Value);
+            reported["TelemetryInterval"] = execOptions!.IntervalMs;
+        }
+        else
+        {
+            reported[prop.Key] = prop.Value;
+        }
+    }
+
+    ConsoleWriter.WriteLine("Update reported properties", ConsoleColor.Cyan);
+    await client!.UpdateReportedPropertiesAsync(reported);
+    ConsoleWriter.WriteLine("Reported properties updated", ConsoleColor.Green);
+}

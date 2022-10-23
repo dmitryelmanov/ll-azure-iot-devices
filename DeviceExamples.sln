@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompleteExample", "CompleteExample\CompleteExample.csproj", "{1DA0D6D4-7D37-4F5A-BB98-CF66CFFFD200}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProvisioningFlow", "ProvisioningFlow\ProvisioningFlow.csproj", "{15269CAF-BEB4-4B36-8BC5-1FF448CCDA0F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProvisioningFlow", "ProvisioningFlow\ProvisioningFlow.csproj", "{15269CAF-BEB4-4B36-8BC5-1FF448CCDA0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalDevice", "UniversalDevice\UniversalDevice.csproj", "{66958315-9E0A-4EFC-9C33-E460D9EB070A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{15269CAF-BEB4-4B36-8BC5-1FF448CCDA0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15269CAF-BEB4-4B36-8BC5-1FF448CCDA0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15269CAF-BEB4-4B36-8BC5-1FF448CCDA0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66958315-9E0A-4EFC-9C33-E460D9EB070A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66958315-9E0A-4EFC-9C33-E460D9EB070A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66958315-9E0A-4EFC-9C33-E460D9EB070A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66958315-9E0A-4EFC-9C33-E460D9EB070A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

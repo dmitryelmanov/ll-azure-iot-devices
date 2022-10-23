@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "UniversalDevice": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "IOT_UD_SCENARIO": "Hub", // Hub, DPS
+        "IOT_UD_EDGE": "False",
+        "IOT_UD_PNP": "True"
+      }
+    }
+  }
+}

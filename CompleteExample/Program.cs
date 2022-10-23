@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 const string DEVICE_CONNECTION_STRING = "<Device's_Primary_Connection_String>";
 var execOptions = new Loop.Options
 {
-    IntervalMs = 3 * 1000,
+    Interval = TimeSpan.FromSeconds(3),
 };
 
 ConsoleWriter.WriteLine($"Start IoT Device {DEVICE_CONNECTION_STRING.GetDeviceId()}", ConsoleColor.Cyan);
@@ -68,7 +68,7 @@ await client.SetReceiveMessageHandlerAsync(
 
 ConsoleWriter.WriteLine("Sending telemetry", ConsoleColor.Cyan);
 var source = new TelemetrySource();
-await Loop.ExecuteAsync(async () =>
+await Loop.ExecuteAsync(async (cancellationToken) =>
 {
     var telemetry = source.Next();
     var json = JsonConvert.SerializeObject(telemetry);
@@ -91,8 +91,8 @@ async Task UpdateProps(TwinCollection desired)
         ConsoleWriter.WriteLine($"{prop.Key}: {prop.Value}", ConsoleColor.Magenta);
         if (prop.Key == "TelemetryInterval")
         {
-            execOptions!.IntervalMs = Convert.ToInt32(prop.Value);
-            reported["TelemetryInterval"] = execOptions!.IntervalMs;
+            execOptions!.Interval = TimeSpan.FromMilliseconds(Convert.ToInt32(prop.Value));
+            reported["TelemetryInterval"] = execOptions!.Interval.TotalMilliseconds;
         }
         else
         {

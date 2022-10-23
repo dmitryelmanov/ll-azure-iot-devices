@@ -1,4 +1,6 @@
-﻿namespace CompleteExample;
+﻿using Common;
+
+namespace CompleteExample;
 
 public class TelemetrySource
 {
